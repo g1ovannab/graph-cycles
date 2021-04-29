@@ -4,9 +4,6 @@ import java.util.*;
 
 public class App {
 
-    //private static int cyclesThroughPermutation = 0;
-    static int cyclesThroughWalk = 0;
-
     public static void main(String[] args) throws IOException {
         Scanner read = new Scanner(System.in);
         
@@ -26,9 +23,7 @@ public class App {
         int vertices = Integer.parseInt(line);
 
         /* Reading the first line that represents the amount of edges that this graph has. */
-        line = br.readLine();
-        //int edges = Integer.parseInt(line);
-        
+        line = br.readLine();        
 
         /* The 'matrix' variable is created with the vertices dimensions. */
         byte[][] matrix = new byte[vertices][vertices];
@@ -47,6 +42,7 @@ public class App {
         read.close();
     }
 
+    /* Global variables. */
     private static ArrayList<int[]> allPermutations = new ArrayList<>();
     private static int cont = 0;
     private static int[] permutation;
@@ -58,30 +54,30 @@ public class App {
         /* This will represent all the vertices. */
         int allVertices[] = new int[vertices];
 
-        /* Assigning values for the vertices array.*/
+        /* Assigning values for the vertices array. */
         int value = 0;
         for (int i = 0; i < vertices; i++){
             value++;
             allVertices[i] = value;
         } 
 
-        /* Calls the permute method. */
-        App.permute(allVertices);
+        /* Calls the startPermute method. */
+        startPermute(allVertices);
     }
 
 
-    /**
-	 * Main method: receives the array whose elements will be permutated.
-	 * @param vertices
-	*/
-	public static void permute(int[] vertices) {
+	public static void startPermute(int[] vertices) {
 
         //i < vertices.length
+        /* Here we control the permutations length. Now it's 3, so the permutations
+        will have length 3 (123, 124, 125...). We keep the number 3 just for tests, and after
+        the tests we'll increase to 4, 5 (1234, 12345...). */
         for (int i = 3; i < 4; i++){
             permutation = new int[i];
             permute(vertices, 0, allPermutations);
         }
 
+        /* Printing the ARRAYLIST permutation (which is wrong!). */
         for (int i = 0; i < allPermutations.size(); i++){
             System.out.println();
             for (int j = 0; j < allPermutations.get(i).length; j++){
@@ -90,13 +86,8 @@ public class App {
         }
 	}
 
-	/**
-	 * Recursive method that implements the permutations.
-	 * @param vertices
-	 * @param n
-	*/
-	private static void permute(int[] vertices, int n, ArrayList<int[]> allPermutations) {
 
+	private static void permute(int[] vertices, int n, ArrayList<int[]> allPermutations) {
 
         /* If the given number is equal to the permutation array length: */
 		if (n == permutation.length) {
@@ -115,11 +106,8 @@ public class App {
             Arrays.sort(clone);
 
             // System.out.print("Permutação ordenada:");
-
             // for (int i=0; i < clone.length; i++) System.out.print(clone[i] + " ");
-            
             // System.out.println("\n\n");
-
             //foundIfPermutationExists(allPermutations);
 
             if(!allPermutations.contains(clone)){
