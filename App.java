@@ -5,7 +5,7 @@ import java.util.*;
 public class App {
 
     //private static int cyclesThroughPermutation = 0;
-    //private static int cyclesThroughWal = 0;
+    static int cyclesThroughWalk = 0;
 
     public static void main(String[] args) throws IOException {
         Scanner read = new Scanner(System.in);
@@ -39,21 +39,143 @@ public class App {
 
 
         /* Counting the cycles through Permutation. */
-        getCyclesThroughPermutation(); //(matrix, vertices)
+        getCyclesThroughPermutation(matrix, vertices); //(matrix, vertices)
 
         /* Counting the cycles through Walks. */
         getCyclesThroughWalks();
 
-
         read.close();
     }
 
-    public static void getCyclesThroughPermutation(){}
+    private static ArrayList<int[]> allPermutations = new ArrayList<>();
+    private static int cont = 0;
+    private static int[] permutation;
+
+    public static void getCyclesThroughPermutation(byte[][] matrix, int vertices){
+        
+        allPermutations = new ArrayList<>();
+
+        /* This will represent all the vertices. */
+        int allVertices[] = new int[vertices];
+
+        /* Assigning values for the vertices array.*/
+        int value = 0;
+        for (int i = 0; i < vertices; i++){
+            value++;
+            allVertices[i] = value;
+        } 
+
+        /* Calls the permute method. */
+        App.permute(allVertices);
+    }
+
+
+    /**
+	 * Main method: receives the array whose elements will be permutated.
+	 * @param vertices
+	*/
+	public static void permute(int[] vertices) {
+
+        //i < vertices.length
+        for (int i = 3; i < 4; i++){
+            permutation = new int[i];
+            permute(vertices, 0, allPermutations);
+        }
+
+        for (int i = 0; i < allPermutations.size(); i++){
+            System.out.println();
+            for (int j = 0; j < allPermutations.get(i).length; j++){
+                System.out.print(allPermutations.get(i)[j]);
+            }
+        }
+	}
+
+	/**
+	 * Recursive method that implements the permutations.
+	 * @param vertices
+	 * @param n
+	*/
+	private static void permute(int[] vertices, int n, ArrayList<int[]> allPermutations) {
+
+
+        /* If the given number is equal to the permutation array length: */
+		if (n == permutation.length) {
+            /* Count plus 1 (permutation accomplished). */
+			cont++;
+
+            /* 
+            TODO Here we need to verify if this permutation is a cycle!!!!!!!!!!!!! 
+            */
+            // checkPermutationIsCycle();
+
+            // System.out.print("Permutação normal:");
+            // for (int i=0; i < permutation.length; i++) System.out.print(permutation[i] + " ");
+            
+            int[] clone = permutation.clone();
+            Arrays.sort(clone);
+
+            // System.out.print("Permutação ordenada:");
+
+            // for (int i=0; i < clone.length; i++) System.out.print(clone[i] + " ");
+            
+            // System.out.println("\n\n");
+
+            //foundIfPermutationExists(allPermutations);
+
+            if(!allPermutations.contains(clone)){
+                //System.out.println("Não sou um clone.");
+                allPermutations.add(permutation);
+                printPermutation();
+            }
+            else {
+                //System.out.println("Sou um clone.");
+            }
+
+		} else {
+            /* For each vertice of the vertices array: */
+			for (int i=0; i < vertices.length; i++) {
+
+                /* Boolean that keeps track if will be repetitions. */
+				boolean found = false;
+
+                /* For each index of the permutation array: */
+				for (int j = 0; j < n; j++) {
+                    /* If the values are equal, the found variable will be true. */
+					if (permutation[j]==vertices[i]) found = true;
+				}
+
+                /* If there's no equal values: */
+				if (!found) {
+                    /* The permutation array in the n index will be equal to the vertice. */
+					permutation[n] = vertices[i];
+                    /* And now, we permute again, but the next index will change. */
+					permute(vertices, n+1, allPermutations);
+				}
+            }
+		}
+	}
+
+    // public static void checkPermutationIsCycle(){
+
+    // }
+
+    /* Printing the permutation combinations.
+    ! Not important (view only).
+    */
+    private static void printPermutation() {
+		System.out.println();
+		System.out.print("(" + cont + ") : ");
+		for (int i=0; i < permutation.length; i++) System.out.print(permutation[i] + " ");
+	}
+
 
     
-    public static void getCyclesThroughWalks(){}
+    public static void getCyclesThroughWalks(){
+        
+        
+    }
 
-
+    
 
     public static void adjacencyMatrix(byte[][] adjMatrix, int vertices, String lineRead, BufferedReader br) throws IOException  {
 

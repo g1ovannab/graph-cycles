@@ -1,0 +1,58 @@
+public static int getCyclesThroughWalks(byte[][] graph, int vertices){
+        
+        int n = 4;
+        // all vertex are marked un-visited
+        // initially.
+        boolean marked[] = new boolean[vertices];
+          
+        // Searching for cycle by using 
+        // v-n+1 vertices
+        for (int i = 0; i < vertices - (n - 1); i++) {
+            DFS(graph, marked, n-1, i, i, vertices);
+              
+            // ith vertex is marked as visited
+            // and will not be visited again
+            marked[i] = true;
+        }
+          
+        return count / 2; 
+    }
+
+    public static int count = 0;
+
+    static void DFS(byte graph[][], boolean marked[],
+                    int n, int vert, int start, int vertices) {
+          
+        // mark the vertex vert as visited
+        marked[vert] = true;
+          
+        // if the path of length (n-1) is found
+        if (n == 0) {
+              
+            // mark vert as un-visited to 
+            // make it usable again
+            marked[vert] = false;
+              
+            // Check if vertex vert end 
+            // with vertex start
+            if (graph[vert][start] == 1) {
+                count++;
+                return;
+            } else
+                return;
+        }
+          
+        // For searching every possible 
+        // path of length (n-1)
+        for (int i = 0; i < vertices; i++)
+            if (!marked[i] && graph[vert][i] == 1)
+              
+                // DFS for searching path by
+                // decreasing length by 1
+                DFS(graph, marked, n-1, i, start, vertices);
+          
+        // marking vert as unvisited to make it
+        // usable again
+        marked[vert] = false;
+    }
+      
