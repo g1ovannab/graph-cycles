@@ -2,12 +2,28 @@ import java.io.*;
 import java.util.*;
 
 
+
 public class App {
+
+                                                /* Global variables. */
+    
+    /* ArrayList with all permutations (without repetition). */
+    static ArrayList<int[]> allPermutations = new ArrayList<>();
+    /* Variable that counts how many permuatons we've done. */
+    static int cont = 0;
+    /* The permutation itself. */
+    static int[] permutation;
+
+    /* How many cycles we got through permutation. */
+    static int cyclesPermutation = 0;
+
+    /* How many cycles we got through walking. */
+    static int cyclesWalk = 0;
+
 
     public static void main(String[] args) throws IOException {
         Scanner read = new Scanner(System.in);
         
-        /* Creating a Object 'File' that stores a file. */
         File file = new File("graph.txt");
 
         /* FileReader is a readable method. */
@@ -15,112 +31,130 @@ public class App {
         /* BufferedReader is a method that allows you to read line by line until a \n is found. */
         BufferedReader br = new BufferedReader(fr);
 
-        /* Line control. */
+
         String line = " ";
 
-        /* Reading the first line that represents the amount of vertices that this graph has. */
+
         line = br.readLine();
         int vertices = Integer.parseInt(line);
 
-        /* Reading the first line that represents the amount of edges that this graph has. */
         line = br.readLine();        
 
-        /* The 'matrix' variable is created with the vertices dimensions. */
-        byte[][] matrix = new byte[vertices][vertices];
-        /* Calls the method that'll do the matrix representation in the form of matrix. */
-        adjacencyMatrix(matrix, vertices, line, br);
-        // Só pra visualizar
-        printGraphs(read, matrix, vertices);
+        
+        byte[][] graph = new byte[vertices][vertices];
+
+        adjacencyMatrix(graph, vertices, line, br);
+
+        printGraphs(read, graph, vertices);
 
 
-        /* Counting the cycles through Permutation. */
-        getCyclesThroughPermutation(matrix, vertices); //(matrix, vertices)
+        getCyclesThroughPermutation(graph, vertices);
+        System.out.println("\nCycles through permutation: " + cyclesPermutation);
 
-        /* Counting the cycles through Walks. */
+
         getCyclesThroughWalks();
+        System.out.println("\nCycles through walks: " + cyclesWalk);
 
         read.close();
     }
 
-    /* Global variables. */
-    private static ArrayList<int[]> allPermutations = new ArrayList<>();
-    private static int cont = 0;
-    private static int[] permutation;
 
-    public static void getCyclesThroughPermutation(byte[][] matrix, int vertices){
-        
-        allPermutations = new ArrayList<>();
-
-        /* This will represent all the vertices. */
+    //* PERMUTATION
+    public static void getCyclesThroughPermutation(byte[][] graph, int vertices){
+    
         int allVertices[] = new int[vertices];
 
-        /* Assigning values for the vertices array. */
+        /* Assigning values for the vertices array (counting that the vertices are 
+        in ascending order). */
         int value = 0;
         for (int i = 0; i < vertices; i++){
             value++;
             allVertices[i] = value;
         } 
 
-        /* Calls the startPermute method. */
-        startPermute(allVertices);
-    }
-
-
-	public static void startPermute(int[] vertices) {
-
-        //i < vertices.length
         /* Here we control the permutations length. Now it's 3, so the permutations
-        will have length 3 (123, 124, 125...). We keep the number 3 just for tests, and after
-        the tests we'll increase to 4, 5 (1234, 12345...). */
-        for (int i = 3; i < 4; i++){
+        will have length 3 (123, 124, 125...). After, we'll increase to 4, 5 (1234, 12345...). 
+        
+        We start the index with value 3, bc a cycle needs AT LEAST 3 vertices/points.
+        If the graph has 4 vertices, we'll do permutations with 3 values (xxx, xxy) AND 
+        4 values (xxxx, xxxy). But if the graph has 5 vertices, we'll do the permutations 
+        with 3 (xxx), 4 (xxxx) and 5 (xxxxx) values. */
+        for (int i = 3; i <= vertices; i++){
             permutation = new int[i];
-            permute(vertices, 0, allPermutations);
+            permute(allVertices, 0, i);
         }
 
-        /* Printing the ARRAYLIST permutation (which is wrong!). */
-        for (int i = 0; i < allPermutations.size(); i++){
-            System.out.println();
-            for (int j = 0; j < allPermutations.get(i).length; j++){
-                System.out.print(allPermutations.get(i)[j]);
+        for (int[] p : allPermutations) {
+            if (checkIfPermutationIsCycle(p, graph) == true){
+                cyclesPermutation++;
             }
         }
-	}
+    }
 
-
-	private static void permute(int[] vertices, int n, ArrayList<int[]> allPermutations) {
+	public static void permute(int[] vertices, int n, int index) {
 
         /* If the given number is equal to the permutation array length: */
 		if (n == permutation.length) {
             /* Count plus 1 (permutation accomplished). */
 			cont++;
 
-            /* 
-            TODO Here we need to verify if this permutation is a cycle!!!!!!!!!!!!! 
-            */
-            // checkPermutationIsCycle();
+            /* Sorting the permutation in case of the permutation 132 appear:
+            the permutation 123 is equal to 132 (so we'll sort the 132 permutation, so 
+            it can be equal to 123 qnd exclude them). */
+            int[] sortedPermutation = permutation.clone();
+            Arrays.sort(sortedPermutation);
 
-            // System.out.print("Permutação normal:");
-            // for (int i=0; i < permutation.length; i++) System.out.print(permutation[i] + " ");
+
+            /* If the arraylist of all permutations DOES NOT contains the sorted permutation, 
+            we'll add the clone of this permutation. */
+            boolean contains = false;
+
+            /* BUT, when we're talking about a permutation with the max number of vertices, 
+            the things are a little bit different. We'll check if the first vertice of 
+            a cicle of a existing permutation on the list if equal to the last vertice of 
+            the cicle of the current permutation.        
+            The variable close will check if the permutations are inverted, and if it isn't, we 
+            can use the permutation. */
+            boolean mirrored = false;
+
+
+            for (int p = 0; p < allPermutations.size(); p++){
+
+                int[] perm = allPermutations.get(p);
+
+                if (index != vertices.length){
+                    if (Arrays.equals(perm, sortedPermutation)) contains = true;
+                }
+                
+                else {
+                    mirrored = isMirrored(perm, permutation);
+                    if (mirrored == true) break;
+                }
             
-            int[] clone = permutation.clone();
-            Arrays.sort(clone);
-
-            // System.out.print("Permutação ordenada:");
-            // for (int i=0; i < clone.length; i++) System.out.print(clone[i] + " ");
-            // System.out.println("\n\n");
-            //foundIfPermutationExists(allPermutations);
-
-            if(!allPermutations.contains(clone)){
-                //System.out.println("Não sou um clone.");
-                allPermutations.add(permutation);
-                printPermutation();
-            }
-            else {
-                //System.out.println("Sou um clone.");
             }
 
+            
+            if (index == vertices.length){
+                if (mirrored == false){
+                    int[] clone = permutation.clone();
+                    allPermutations.add(clone);
+    
+                    //!View only.
+                    printPermutation();
+                }
+                
+            } else {
+                if(contains == false){
+                    int[] clone = permutation.clone();
+                    allPermutations.add(clone);
+
+                    //!View only.
+                    printPermutation();
+                }
+            }
+
+            
 		} else {
-            /* For each vertice of the vertices array: */
 			for (int i=0; i < vertices.length; i++) {
 
                 /* Boolean that keeps track if will be repetitions. */
@@ -128,7 +162,6 @@ public class App {
 
                 /* For each index of the permutation array: */
 				for (int j = 0; j < n; j++) {
-                    /* If the values are equal, the found variable will be true. */
 					if (permutation[j]==vertices[i]) found = true;
 				}
 
@@ -137,40 +170,84 @@ public class App {
                     /* The permutation array in the n index will be equal to the vertice. */
 					permutation[n] = vertices[i];
                     /* And now, we permute again, but the next index will change. */
-					permute(vertices, n+1, allPermutations);
+					permute(vertices, n+1, index);
 				}
             }
 		}
 	}
 
-    // public static void checkPermutationIsCycle(){
+    public static boolean isMirrored(int[] perm1, int[] perm2){
+        
+        int[] mirror = new int [perm1.length];
 
-    // }
+        /* If we gave 7 vertices, we'll check this:
+            
+            permutation A                           permutation B
+        (permutation on the list)              (the current permutation) 
+            [0 1 2 3 4 5 6]                         [0 1 2 3 4 5 6]         [indexes]
+            1 2 3 4 5 6 7                           7 6 5 4 3 2 1           [permuation]
 
-    /* Printing the permutation combinations.
-    ! Not important (view only).
-    */
-    private static void printPermutation() {
+        if the A[0] is equal to the B[7 (length) - 1 - 0 (current index)], they'll possibly
+        be inverted, and this will apply to the following values of the index loop (for). */
+        for (int i = 0; i < perm1.length; i++){
+            mirror[i] = perm1[perm1.length-1-i];
+        }   
+
+        if (Arrays.equals(mirror, perm2)) return true;
+        else return false; 
+
+    }
+
+    public static boolean checkIfPermutationIsCycle(int[] p, byte[][] graph){
+        int edgeExists = 0;
+
+        /* For each vertice: */
+        for (int i = 0; i < p.length; i++){
+
+            int row = p[i] - 1;
+            int column;
+
+            /* If we're analyzating the last vertice, the edge is different. */            
+            if (i == p.length - 1){
+                column = p[0] - 1;
+            } else {
+                column = p[i+1] - 1;
+            }
+
+            /* If the value in the graph is equal to 1, it means that the edge exists. */
+            if (graph[row][column] == 1){
+                edgeExists++;
+            }
+        }
+
+        /* If the counting of the edges is equal to the length of permutation, is a cycle. */
+        if (edgeExists == p.length) return true;
+        else return false;
+
+    }
+
+    //!View only.
+    public static void printPermutation() {
 		System.out.println();
 		System.out.print("(" + cont + ") : ");
 		for (int i=0; i < permutation.length; i++) System.out.print(permutation[i] + " ");
 	}
 
 
-    
-    public static void getCyclesThroughWalks(){
-        
-        
+
+    //* WALKING
+    public static void getCyclesThroughWalks(){   
     }
 
     
-
-    public static void adjacencyMatrix(byte[][] adjMatrix, int vertices, String lineRead, BufferedReader br) throws IOException  {
+    
+    //* GRAPH REPRESENTATION
+    public static void adjacencyMatrix(byte[][] graph, int vertices, String lineRead, BufferedReader br) throws IOException  {
 
         /* Initializing the matrix with 0's. */
         for (int row = 0; row < vertices; row++){
             for (int column = 0; column < vertices; column++){
-                adjMatrix[row][column] = 0;
+                graph[row][column] = 0;
             }
         }
 
@@ -190,42 +267,29 @@ public class App {
             int row = Integer.parseInt(slicedEdges[0]); 
             int column = Integer.parseInt(slicedEdges[1]);
 
-            adjMatrix[row - 1][column - 1] = 1;
-            adjMatrix[column - 1][row - 1] = 1;
+            graph[row - 1][column - 1] = 1;
+            graph[column - 1][row - 1] = 1;
 
             /* We need to read the next line, so it can go back to the while validation;  */
             lineRead = br.readLine();
         }
     }
 
-    /* 
-    ! Not important (view only). 
-    */
-    public static void printGraphs(Scanner read, byte[][] matrix, int vertices){
-        
-        /* This variable stores the answer that the user will give (if we'll show the graph 
-        representation or not). */
+    //!View only. 
+    public static void printGraphs(Scanner read, byte[][] graph, int vertices){
         String answer = "";
 
         System.out.println("Do you want to print the representation of the graph? Type y or n.");
         answer = read.nextLine().toLowerCase();
 
-        /* If the answer is yes, it'll print one, all of some graphs. */
         if (answer.equals("yes") || answer.equals("y")){
-
             for (int i = 0; i < vertices; i++){
                 for (int j = 0; j < vertices; j++){
-                    System.out.print(matrix[i][j] + "  ");
+                    System.out.print(graph[i][j] + "  ");
                 }
                 System.out.print("\n");
             }
-
-        } 
-        
-        /* If the answer is 'no', it will greet the user. */
-        else{
-            System.out.println("Okay, thanks for visiting. Check out the code!");
-        }
+        } else System.out.println("Okay, thanks for visiting. Check out the code!");
     }
 
 }
