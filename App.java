@@ -9,8 +9,7 @@ public class App {
     
     /* ArrayList with all permutations (without repetition). */
     static ArrayList<int[]> allPermutations = new ArrayList<>();
-    /* Variable that counts how many permuatons we've done. */
-    static int cont = 0;
+
     /* The permutation itself. */
     static int[] permutation;
 
@@ -52,8 +51,8 @@ public class App {
         System.out.println("\nCycles through permutation: " + cyclesPermutation);
 
 
-        getCyclesThroughWalks();
-        System.out.println("\nCycles through walks: " + cyclesWalk);
+        getCyclesThroughWalks(graph, vertices);
+        System.out.println("\nCycles through walks: " + cyclesWalk/2);
 
         read.close();
     }
@@ -95,12 +94,7 @@ public class App {
 
         /* If the given number is equal to the permutation array length: */
 		if (n == permutation.length) {
-            /* Count plus 1 (permutation accomplished). */
-			cont++;
 
-            /* Sorting the permutation in case of the permutation 132 appear:
-            the permutation 123 is equal to 132 (so we'll sort the 132 permutation, so 
-            it can be equal to 123 qnd exclude them). */
             int[] sortedPermutation = permutation.clone();
             Arrays.sort(sortedPermutation);
 
@@ -122,38 +116,18 @@ public class App {
 
                 int[] perm = allPermutations.get(p);
 
-                if (index != vertices.length){
-                    if (Arrays.equals(perm, sortedPermutation)) contains = true;
-                }
-                
-                else {
-                    mirrored = isMirrored(perm, permutation);
-                    if (mirrored == true) break;
-                }
-            
+
+                if (Arrays.equals(perm, sortedPermutation)) contains = true;
+                mirrored = isMirrored(perm, permutation);
+                if (mirrored == true) break;
+
             }
 
-            
-            if (index == vertices.length){
-                if (mirrored == false){
-                    int[] clone = permutation.clone();
-                    allPermutations.add(clone);
-    
-                    //!View only.
-                    printPermutation();
-                }
-                
-            } else {
-                if(contains == false){
-                    int[] clone = permutation.clone();
-                    allPermutations.add(clone);
-
-                    //!View only.
-                    printPermutation();
-                }
+            if (mirrored == false && contains == false){
+                int[] clone = permutation.clone();
+                allPermutations.add(clone);
             }
 
-            
 		} else {
 			for (int i=0; i < vertices.length; i++) {
 
@@ -226,20 +200,60 @@ public class App {
 
     }
 
-    //!View only.
-    public static void printPermutation() {
-		System.out.println();
-		System.out.print("(" + cont + ") : ");
-		for (int i=0; i < permutation.length; i++) System.out.print(permutation[i] + " ");
-	}
-
-
 
     //* WALKING
-    public static void getCyclesThroughWalks(){   
+    public static void getCyclesThroughWalks(byte[][] graph, int vertices){
+        
+        /* Here we control the path's length. Now it's 3, so the walks
+        will have length 3 (123, 124, 125...). After, we'll increase to 4, 5 (1234, 12345...). 
+        
+        We start the index with value 3, bc a cycle needs AT LEAST 3 vertices/points.
+        If the graph has 4 vertices, we'll do walks with 3 values (xxx, xxy) AND 
+        4 values (xxxx, xxxy). But if the graph has 5 vertices, we'll do the walks 
+        with 3 (xxx), 4 (xxxx) and 5 (xxxxx) values. */
+        for (int n = 3; n <= vertices; n++){
+
+            /* All vertices are marked un-visited. */
+            boolean marked[] = new boolean[vertices];
+                
+            for (int i = 0; i < vertices - (n - 1); i++) {
+                depthFirstSerach(graph, marked, n - 1, i, i, vertices);
+                
+                /* Ith vertice is marked as visited and it'll not be visited again. */
+                marked[i] = true;
+            }  
+        }
     }
 
-    
+    public static void depthFirstSerach(byte graph[][], boolean marked[], int n, int vert, int start, int vertices) {
+          
+        marked[vert] = true;
+          
+        if (n == 0) {
+              
+            /* Mark as un-visited to make it usable again. */
+            marked[vert] = false;
+              
+            if (graph[vert][start] == 1) {
+                cyclesWalk++;
+                return;
+            } else return;
+        }
+          
+
+        for (int i = 0; i < vertices; i++){
+            if (!marked[i] && graph[vert][i] == 1){
+                depthFirstSerach(graph, marked, n-1, i, start, vertices);
+            }
+        }
+            
+        /* Vertice is unvisited to make it usable again.*/ 
+        marked[vert] = false;
+    }
+
+    public static boolean checkIfWalkIsCycle(){
+        return true;
+    }
     
     //* GRAPH REPRESENTATION
     public static void adjacencyMatrix(byte[][] graph, int vertices, String lineRead, BufferedReader br) throws IOException  {
