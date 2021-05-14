@@ -251,9 +251,6 @@ public class App {
         marked[vert] = false;
     }
 
-    public static boolean checkIfWalkIsCycle(){
-        return true;
-    }
     
     //* GRAPH REPRESENTATION
     public static void adjacencyMatrix(byte[][] graph, int vertices, String lineRead, BufferedReader br) throws IOException  {
