@@ -63,6 +63,8 @@ public class App {
     
         int allVertices[] = new int[vertices];
 
+        long startTimer = System.nanoTime();
+
         /* Assigning values for the vertices array (counting that the vertices are 
         in ascending order). */
         int value = 0;
@@ -88,6 +90,11 @@ public class App {
                 cyclesPermutation++;
             }
         }
+
+        long finalTimer = System.nanoTime();
+        long totalTime = finalTimer - startTimer;
+
+        System.out.println("\nTime permutation: " + totalTime + "ns");
     }
 
 	public static void permute(int[] vertices, int n, int index) {
@@ -203,6 +210,8 @@ public class App {
 
     //* WALKING
     public static void getCyclesThroughWalks(byte[][] graph, int vertices){
+
+        long startTimer = System.nanoTime();
         
         /* Here we control the path's length. Now it's 3, so the walks
         will have length 3 (123, 124, 125...). After, we'll increase to 4, 5 (1234, 12345...). 
@@ -223,6 +232,12 @@ public class App {
                 marked[i] = true;
             }  
         }
+
+        long finalTimer = System.nanoTime();
+        long totalTime = finalTimer - startTimer;
+
+        System.out.println("\nTime walking: " + totalTime + "ns");
+
     }
 
     public static void depthFirstSearch(byte graph[][], boolean marked[], int n, int vert, int start, int vertices) {
@@ -243,7 +258,7 @@ public class App {
 
         for (int i = 0; i < vertices; i++){
             if (!marked[i] && graph[vert][i] == 1){
-                depthFirstSerach(graph, marked, n-1, i, start, vertices);
+                depthFirstSearch(graph, marked, n-1, i, start, vertices);
             }
         }
             
