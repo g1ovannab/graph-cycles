@@ -217,7 +217,7 @@ public class App {
             boolean marked[] = new boolean[vertices];
                 
             for (int i = 0; i < vertices - (n - 1); i++) {
-                depthFirstSerach(graph, marked, n - 1, i, i, vertices);
+                depthFirstSearch(graph, marked, n - 1, i, i, vertices);
                 
                 /* Ith vertice is marked as visited and it'll not be visited again. */
                 marked[i] = true;
@@ -225,7 +225,7 @@ public class App {
         }
     }
 
-    public static void depthFirstSerach(byte graph[][], boolean marked[], int n, int vert, int start, int vertices) {
+    public static void depthFirstSearch(byte graph[][], boolean marked[], int n, int vert, int start, int vertices) {
           
         marked[vert] = true;
           
